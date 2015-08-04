@@ -131,7 +131,7 @@ alias update="sudo powerpill -Syu"
 alias aupdate="pacaur -Syu"
 alias pkspot="pkill spotify"
 alias fuck='eval $(thefuck $(fc -ln -1 | tail -n 1)); fc -R'
-
+alias cproxy='chromium --proxy-server="socks5://localhost:9999" --host-resolver-rules="MAP * 0.0.0.0 , EXCLUDE localhost"'
 
 #######################
 # Functions
