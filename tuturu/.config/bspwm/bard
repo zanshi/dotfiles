@@ -1,0 +1,160 @@
+#!/bin/bash
+# tb01110100's experimental bar setup
+
+## SETTINGS
+  BAR_FIFO=/tmp/bar-fifo  # you should probably just leave this alone
+  # colors, in the format "#<alpha><rr><gg><bb>"
+  color_fg="#ffffbb00"    # bar foreground
+  color_bg="#ff141414"    # bar background
+  #color_fg="#FFcc99cc"
+  #color_bg="#FF2d2d2d"
+  # colors for tags
+  color_01="#ffffffff"	  # focused & occupied
+  color_02="#ffffffff"	  # focused & empty
+  color_03="#ffffffff"	  # focused & urgent
+  color_04="#ffffbb00"	  # unfocused & occupied
+  color_05="#ffffbb00"	  # unfocused & empty
+  color_06="#ffff0000"	  # unfocused & urgent
+  # weather
+  citycode=SWXX0022	  # yahoo city code for weather
+  units=c		  # weather temp units, f or c
+  # mpd
+  mpdport=6600            # port mpd listening on
+  # bar options
+  #font="-*-terminus-medium-r-normal-*-11-*-*-*-c-*-*-*"
+  font="-benis-lemon-medium-r-normal--10-110-75-75-m-50-ISO8859-1"
+  #font="-gohu-*-medium-*-*-*-11-*-*-*-*-*-*-*"
+  geometry="1920x20+0+0" # in the format "<width>x<height>+<xoffset>+<yoffset>"
+## END SETTINGS
+
+modules() {
+  # bspwm stats
+  bspc control --subscribe > "$BAR_FIFO" &
+
+  # date & time
+  while true; do
+    date +"c%d·%m·%y  |  %H:%M"
+    sleep 1
+  done > "$BAR_FIFO" &
+
+#  # weather
+#  while true; do
+#    echo "w$(curl -fs http://weather.yahooapis.com/forecastrss\?u=${units}\&w=${citycode} | sed 's/<[^>]*>//g' | grep -e Current -A 1 | tail -n 1 | tr '[:upper:]' '[:lower:]')"
+#    sleep 10
+#  done > "$BAR_FIFO" &
+
+  # disk usage
+  while true; do
+    echo "root: $(df -h / | tail -n 1 | awk '{print $3}' | tr '[:upper:]' '[:lower:]') / $(df -h / | tail -n 1 | awk '{print $2}' | tr '[:upper:]' '[:lower:]')"
+    sleep 60
+  done > "$BAR_FIFO" &
+
+  # ram usage
+  while true; do
+    echo "mem: $(free -h | grep Mem | awk '{print $3}' | tr '[:upper:]' '[:lower:]') / $(free -h | grep Mem | awk '{print $2}' | tr '[:upper:]' '[:lower:]')"
+    sleep 5
+  done > "$BAR_FIFO" &
+
+  # volume
+  while true; do
+    echo "volume: $(amixer get Master | tail -n 1 | awk '{print $4}' | tr -d '[]%')"
+    sleep 1
+  done > "$BAR_FIFO" &
+
+  # mpd info
+  while true; do
+    [[ -z "$(pidof mpd)" ]] && { echo "p  mpd is not running"; sleep 1; continue; }
+    [[ "$(printf "status\nclose\n" | curl --connect-timeout 1 -fsm 3 telnet://localhost:$mpdport | grep state:)" = "state: pause" ]] && { echo "p  mpd paused"; sleep 1; continue; }
+    [[ "$(printf "status\nclose\n" | curl --connect-timeout 1 -fsm 3 telnet://localhost:$mpdport | grep state:)" = "state: stop" ]] && { echo "p"; sleep 1; continue; }
+    echo "p  now playing: $(mpc current -f %artist%) > $(mpc current -f %title%)" | tr '[:upper:]' '[:lower:]'
+    #echo "p now playing: $(ncmpcpp --now-playing)"
+    sleep 1
+  done > "$BAR_FIFO" &
+
+#  # cpu temps
+#  while true; do
+#    core0=$(sensors coretemp-isa-0000 | grep "Core 0" | awk '{print $3}')
+#    core1=$(sensors coretemp-isa-0000 | grep "Core 1" | awk '{print $3}')
+#    core2=$(sensors coretemp-isa-0000 | grep "Core 2" | awk '{print $3}')
+#    core3=$(sensors coretemp-isa-0000 | grep "Core 3" | awk '{print $3}')
+#    echo "temps: "$core0" "$core1" "$core2" "$core3"" | tr -d 'C+'
+#    sleep 1
+#  done > "$BAR_FIFO" &
+}
+
+parse-module-output() {
+  while read -r line ; do
+    case $line in
+      p*)
+        # set up mpd indicator
+        mpdinfo="${line#?}" ;;
+ #     t*)
+ #       # set up cpu temp indicator
+ #       cputemps="$line" ;;
+      v*)
+        # set up volume indicator
+        volume="$line" ;;
+      m*)
+        # set up mem indicator
+        mem="$line" ;;
+      r*)
+        # set up rootfs indicator
+        rootfs="$line" ;;
+ #     w*)
+ #       # set up weather
+ #       weather="${line#?}" ;;
+      c*)
+        # set up clock
+        clock="${line#?}" ;;
+      W*)
+        # set up tags
+        wm_infos=""
+        IFS=':'
+        set -- ${line#?}
+        while [ $# -gt 0 ] ; do
+          item=$1
+          name=${item#?}
+          desk=" $name "
+          case $item in
+            O*)
+              # focused occupied desktop
+              wm_infos="$wm_infos%{F$color_01}%{A:bspc desktop -f $name:}$desk%{A}" ;;
+            F*)
+              # focused empty desktop
+              wm_infos="$wm_infos%{F$color_02}%{A:bspc desktop -f $name:}$desk%{A}" ;;
+            U*)
+              # focused urgent desktop
+              wm_infos="$wm_infos%{F$color_03}%{A:bspc desktop -f $name:}$desk%{A}" ;;
+            o*)
+              # occupied desktop
+              wm_infos="$wm_infos%{F$color_04}%{A:bspc desktop -f $name:}$desk%{A}" ;;
+            f*)
+              # free desktop
+              wm_infos="$wm_infos%{F$color_05}%{A:bspc desktop -f $name:}$desk%{A}" ;;
+            u*)
+              # urgent desktop
+              wm_infos="$wm_infos%{F$color_06}%{A:bspc desktop -f $name:}$desk%{A}" ;;
+          esac
+          shift
+        done ;;
+    esac
+    printf "%s\n" "%{c}| $wm_infos%{F-} | $mpdinfo%{S+}  |  $volume  |  $mem  |  $rootfs  |  $clock  |"
+  done
+}
+
+# prepare
+if [[ $(pgrep -cx bard) -gt 1 ]]; then
+  echo "bar-aint-recursive is already running" >&2
+  exit 1
+fi
+trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+[ -e "$BAR_FIFO" ] && rm "$BAR_FIFO"
+mkfifo "$BAR_FIFO"
+
+# run module commands
+modules &
+
+# pull it all together
+parse-module-output < "$BAR_FIFO" | bar -p -f "$font" -B "$color_bg" -F "$color_fg" -g "$geometry" | while read line; do eval "$line"; done &
+
+wait

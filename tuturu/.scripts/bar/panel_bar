@@ -1,0 +1,77 @@
+#!/bin/bash
+cd $(dirname $0)
+. config
+
+while read -r line ; do
+	case $line in
+		S*)
+			# conky
+			conky="%{U$COLOR_PANEL_UNDERLINE}%{F$COLOR_STATUS_FG}%{B$COLOR_STATUS_BG} ${line#?} %{B-}%{F-}"
+			;;
+		T*)
+			# xtitle
+			title="%{F$COLOR_TITLE_FG}%{B$COLOR_TITLE_BG} ${line#?} %{B-}%{F-}"
+			;;
+		W*)
+			# bspwm
+			bspwm=""
+			IFS=':'
+			set -- ${line#?}
+			while [ $# -gt 0 ] ; do
+				item=$1
+				name=${item#?}
+				case $item in
+					O*)	# focused occupied desktop
+					if [[ $name == "tv" ]]; then #ignoring if the desktop is called tv
+						bspwm="${bspwm}"
+					else
+						bspwm="${bspwm}%{F$COLOR_FOCUSED_OCCUPIED_FG}%{B$COLOR_FOCUSED_OCCUPIED_BG}%{U$COLOR_PANEL_UNDERLINE}%{+u} ${name} %{-u}%{B-}%{F-}"
+					fi
+					;;
+
+					F*)	# focused free desktop
+					if [[ $name == "tv" ]]; then #ignoring if the desktop is called tv
+						bspwm="${bspwm}"
+					else
+						bspwm="${bspwm}%{F$COLOR_FOCUSED_FREE_FG}%{B$COLOR_FOCUSED_FREE_BG}%{U$COLOR_PANEL_UNDERLINE}%{+u} ${name} %{-u}%{B-}%{F-}"
+					fi
+					;;
+
+					U*)	# focused urgent desktop
+					if [[ $name == "tv" ]]; then #ignoring if the desktop is called tv
+						bspwm="${bspwm}"
+					else
+						bspwm="${bspwm}%{F$COLOR_FOCUSED_URGENT_FG}%{B$COLOR_FOCUSED_URGENT_BG}%{U$COLOR_PANEL_UNDERLINE}%{+u} ${name} %{-u}%{B-}%{F-}"
+					fi
+					;;
+
+					o*)	# occupied desktop
+					if [[ $name == "tv" ]]; then #ignoring if the desktop is called tv
+						bspwm="${bspwm}"
+					else
+						bspwm="${bspwm}%{-u}%{F$COLOR_OCCUPIED_FG}%{B$COLOR_OCCUPIED_BG} ${name} %{B-}%{F-}%{-u}"
+					fi
+					;;
+
+					f*)	# empty desktop
+					if [[ $name == "tv" ]]; then #ignoring if the desktop is called tv
+						bspwm="${bspwm}"
+					else
+						bspwm="${bspwm}%{F$COLOR_FREE_FG}%{B$COLOR_FREE_BG} ${name} %{B-}%{F-}"
+					fi
+					;;
+
+					u*) # urgent desktop
+					if [[ $name == "tv" ]]; then #ignoring if the desktop is called tv
+						bspwm="${bspwm}"
+					else
+						bspwm="${bspwm}%{-u}%{F$COLOR_URGENT_FG}%{B$COLOR_URGENT_BG} ${name} %{B-}%{F-}"
+					fi
+					;;
+				esac
+				shift
+			done
+			;;
+	esac
+	printf "%s\n" "%{l}${bspwm}%{c}${title}%{r}${conky}"
+done

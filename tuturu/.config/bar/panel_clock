@@ -1,0 +1,17 @@
+#!/bin/bash
+cd $(dirname $0)
+source config
+
+# COLOR_CLOCK_BACKGROUND
+
+#clock=$(clock -f %H:%M)
+clock=$(date "+%a %d %b %R")
+
+style="%{-u}%{F$COLOR_CLOCK_FOREGROUND}%{B$COLOR_CLOCK_BACKGROUND}%{U$COLOR_CLOCK_UNDERLINE}"
+
+output="$style$clock"
+
+output=$COLOR_RESET$output$COLOR_RESET
+echo $output;
+
+

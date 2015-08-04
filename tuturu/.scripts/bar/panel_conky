@@ -1,0 +1,18 @@
+short_units yes
+use_spacer none
+background yes
+out_to_console yes
+out_to_x no
+mpd_host /home/katt/.config/mpd/socket
+
+update_interval 1
+
+TEXT
+S \
+$if_mpd_playing \
+%{F-}%{U-}%{B-}%{-u}%{+u}%{F\#FFcc99cc}♪ %{F\#FFcccccc}%{B\#FF2d2d2d} \
+MPD is $mpd_status: $mpd_artist - $mpd_title \
+($mpd_elapsed/$mpd_length)  \
+$endif \
+${execi 1 ./panel_media} ${execi 1 ./panel_temperature} ${execi 15 ./panel_clock}
+

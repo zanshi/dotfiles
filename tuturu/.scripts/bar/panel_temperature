@@ -1,0 +1,28 @@
+#!/bin/bash
+cd $(dirname $0)
+source config
+
+#cpu_temp=$((`sensors | grep "coretemp-isa-0000" | cut -d'+' -f2 | head -c2`))
+cpu_temp=$((`sensors | grep 'CPU Temperature' | cut -d'+' -f2 | head -c2`))
+gpu_temp=$((`sensors | grep 'temp1' | cut -d'+' -f2 | head -c2`))
+
+if [[ $CPU_TEMP > 55 ]]; then
+    COLOR_TEMP_CPU_FOREGROUND=$COLOR_TEMP_CPU_FOREGROUND_WARNING
+    COLOR_TEMP_CPU_BACKGROUND=$COLOR_TEMP_CPU_BACKGROUND_WARNING
+    COLOR_TEMP_CPU_UNDERLINE=$COLOR_TEMP_CPU_UNDERLINE_WARNING
+fi
+
+if [[ $GPU_TEMP > 70 ]]; then
+    COLOR_TEMP_GPU_FOREGROUND=$COLOR_TEMP_GPU_FOREGROUND_WARNING
+    COLOR_TEMP_GPU_BACKGROUND=$COLOR_TEMP_GPU_BACKGROUND_WARNING
+    COLOR_TEMP_GPU_UNDERLINE=$COLOR_TEMP_GPU_UNDERLINE_WARNING
+fi
+
+cpu_style="%{-u}%{F$COLOR_TEMP_CPU_FOREGROUND}%{B$COLOR_TEMP_CPU_BACKGROUND}%{U$COLOR_TEMP_CPU_UNDERLINE}"
+gpu_style="%{-u}%{F$COLOR_TEMP_GPU_FOREGROUND}%{B$COLOR_TEMP_GPU_BACKGROUND}%{U$COLOR_TEMP_GPU_UNDERLINE}"
+
+gpu="%{F#FFcc99cc}GPU: $COLOR_RESET$gpu_style$gpu_temp°$COLOR_RESET"
+cpu="%{F#FFcc99cc}CPU: $COLOR_RESET$cpu_style$cpu_temp°$COLOR_RESET"
+
+output="$gpu $cpu"
+echo $output;

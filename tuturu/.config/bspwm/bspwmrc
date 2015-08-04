@@ -1,0 +1,76 @@
+#! /bin/sh
+
+
+#bspc config top_padding 13
+bspc config top_padding 20
+bspc config border_width        2
+bspc config window_gap         15
+bspc config split_ratio         0.68
+bspc config borderless_monocle  true
+bspc config gapless_monocle     true
+bspc config focus_follows_pointer true
+bspc config auto_alternate true
+bspc config auto_cancel true
+bspc config normal_border_color "#393939"
+#bspc config active_border_color "#515151"
+#bspc config focused_border_color "#515151"
+bspc config active_border_color "#3d2c3d"
+bspc config focused_border_color "#723f71"
+bspc config presel_border_color "#9a875f"
+bspc config urgent_border_color "#504339"
+bspc config focused_locked_border_color "#8c644c"
+bspc config normal_frame_opacity 0.0
+bspc config focused_frame_opacity 0.1
+
+
+#BENQ
+#bspc monitor DVI-D-0 -d ⮫ ⮬ ⮭
+
+#SAMSUNG
+#bspc monitor DVI-I-1 -d ⮮ ⮯
+
+# TV
+#bspc monitor HDMI-0 -d tv
+
+#vbox monitors
+# open source drivers
+bspc monitor DVI-0 -d ⮫ ⮬ ⮭ 
+bspc monitor DVI-1 -d ⮮ ⮯
+
+#catalyst
+#bspc monitor DFP6 -d ⮫ ⮬ ⮭
+#bspc monitor CRT1 -d ⮮ ⮯
+
+#bspc monitor -d 1 2 3
+
+#bspc rule -a "xbmc.bin" desktop=tv fullscreen=on
+#bspc rule -a "Thunar" floating=on
+#bspc rule -a "Steam" desktop=⮮
+bspc rule -a "Steam" floating=on
+bspc rule -a "Gimp" floating=on
+bspc rule -a "Google Chrome" floating=on
+bspc rule -a chrome floating=on
+bspc rule -a Wine follow=on floating=on
+bspc rule -a pavucontrol floating=on
+
+# Firefox
+bspc rule -a "Navigator" floating=off # Main Browser
+bspc rule -a "Places" floating=on # History
+bspc rule -a "Browser" floating=on # Settings
+
+bspc rule -a "mpv" floating=on
+bspc rule -a "Viewnior" floating=on
+
+bspc rule -a "sun-awt-X11-XFramePeer" floating=on
+bpsc rule -a "com-mathworks-professionalinstaller-Launcher" floating=on
+
+#/home/katt/.config/urayamashi/panel &
+
+#/home/katt/.config/bspwm/bard &
+
+/home/katt/.config/bar/panel &
+
+
+mousemove 960 540 &
+
+wmname LG3D

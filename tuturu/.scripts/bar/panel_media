@@ -1,0 +1,15 @@
+#!/bin/bash
+cd $(dirname $0)
+source config
+
+#system_volume=$((`pacmd list-sinks | grep -A6 "name: <alsa_output.usb-Creative_Technology_USB_Sound_Blaster_HD_00000AGu-00-HD.analog-stereo>" | 
+#grep "volume: " | cut -d'/' -f2 | head -c4`))
+system_volume="$(amixer get Master | tail -n 1 | awk '{print $5}' | tr -d '[]%')"
+mpd_volume=$((`pacmd list-sink-inputs | grep -B10 "Music Player Daemon" | grep "volume: " | cut -d'/' -f2 | head -c4`))
+
+
+output="%{F$COLOR_MEDIA_MPD_VOLUME_ICON}⮜%{F-} %{F$COLOR_MEDIA_MPD_VOLUME}%$mpd_volume%% %{F$COLOR_MEDIA_SYSTEM_VOLUME_ICON}⮞%{F-} %{F$COLOR_MEDIA_SYSTEM_VOLUME}%$system_volume%%%{F-}"
+
+echo $output;
+
+
