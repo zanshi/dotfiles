@@ -61,6 +61,13 @@ bindsym $mod+Return exec termite
 bindsym $mod+F12 exec amixer -q set Master 1965+
 bindsym $mod+F11 exec amixer -q set Master 1965-
 bindsym $mod+F10 exec amixer -q set PCM playback toggle
+
+bindsym button4 nop
+bindsym button5 nop
+
+bindsym --whole-window $mod+button4 exec amixer -q set Master 1965+
+bindsym --whole-window $mod+button5 exec amixer -q set Master 1965-
+
 # mpd control
 bindsym $mod+F5 exec mpc toggle
 bindsym $mod+F6 exec mpc stop
